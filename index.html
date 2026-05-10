@@ -234,9 +234,13 @@
   async function loadAll() { await Promise.all([renderAnfragen(), renderPDFs()]); }
 
   // ── Anfragen als Cards ─────────────────────────────────────────────
-  function toggleCard(card) {
-    const body = card.querySelector('.anf-body');
-    if (body) body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  function toggleCard(id) {
+    const body = document.getElementById('body-' + id);
+    const icon = document.getElementById('icon-' + id);
+    if (!body) return;
+    const isHidden = body.style.display === 'none';
+    body.style.display = isHidden ? 'block' : 'none';
+    if (icon) icon.textContent = isHidden ? '▲' : '▼';
   }
 
   async function renderAnfragen() {
