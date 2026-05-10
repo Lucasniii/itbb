@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Einbauüberprüfung</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #0f1117; min-height: 100vh; padding: 2rem 1rem; color: #e0e0e0; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+
+  /* Login */
+  #login-screen { max-width: 360px; margin: 4rem auto; background: #1a1d27; border-radius: 12px; border: 0.5px solid #2e3142; padding: 2rem; }
+  #login-screen h1 { font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 0.4rem; text-align:center; }
+  #login-screen p { font-size: 14px; color: #888; margin-bottom: 2rem; text-align:center; }
+  .login-field { margin-bottom: 1rem; }
+  .login-field label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; }
+  .login-field input { width: 100%; padding: 0.7rem 0.9rem; border: 0.5px solid #2e3142; border-radius: 8px; font-size: 15px; color: #fff; background: #12151f; outline: none; }
+  .login-field input:focus { border-color: #5b7de8; }
+  .login-err { font-size: 13px; color: #e05a5a; margin-bottom: 0.75rem; display: none; }
+  .btn-login { width: 100%; background: #5b7de8; color: #fff; padding: 0.75rem; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; }
+  .btn-login:hover { background: #4a6ad4; }
+
+  /* Admin */
+  #admin-screen { display: none; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px; }
+  .top-bar h1 { font-size: 20px; font-weight: 600; color: #fff; }
+  .badge-live { font-size: 12px; background: #1e3a5f; color: #6ab0f5; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .logout-btn { font-size: 13px; color: #888; background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-box { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 8px; padding: 1rem 1.25rem; }
+  .stat-box.hl { border-color: #e0c040; background: #1a1800; }
+  .stat-num { font-size: 26px; font-weight: 600; color: #fff; }
+  .stat-num.yellow { color: #e0c040; }
+  .stat-label { font-size: 12px; color: #666; margin-top: 2px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 0.5px solid #2e3142; margin-bottom: 1.5rem; }
+  .tab { padding: 0.6rem 1.2rem; font-size: 14px; font-weight: 500; color: #888; cursor: pointer; border-radius: 8px 8px 0 0; border: none; background: none; position: relative; }
+  .tab.active { color: #fff; background: #2e3142; }
+  .tab-badge { position: absolute; top: 4px; right: 4px; background: #e05a5a; color: #fff; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+  .filter-btn { padding: 0.4rem 1rem; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid #2e3142; background: #12151f; color: #888; }
+  .filter-btn.active { background: #5b7de8; border-color: #5b7de8; color: #fff; }
+  .refresh-btn { margin-left: auto; padding: 0.4rem 1rem; border-radius: 8px; font-size: 13px; cursor: pointer; border: 0.5px solid #2e3142; background: #12151f; color: #888; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #1d9e75; animation: livepulse 2s infinite; display: inline-block; margin-right: 4px; }
+  @keyframes livepulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  /* Anfragen Cards */
+  .anfragen-list { display: flex; flex-direction: column; gap: 10px; }
+  .anf-card { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 10px; padding: 1.1rem 1.25rem; }
+  .anf-card.pending { border-color: #e0c040; background: #1a1800; }
+  .anf-card.bestaetigt { border-color: #1d9e75; }
+  .anf-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  .anf-kz { font-size: 18px; font-weight: 700; color: #fff; }
+  .anf-date { font-size: 12px; color: #555; margin-top: 2px; }
+  .anf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 0.9rem; }
+  .anf-field { background: #12151f; border-radius: 7px; padding: 0.5rem 0.7rem; }
+  .anf-field-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .anf-field-val { font-size: 13px; color: #ccc; font-weight: 500; }
+  .anf-field-val.highlight { color: #6ab0f5; }
+  .anf-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .checks { display: flex; gap: 10px; flex-wrap: wrap; }
+  .check-chip { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .check-chip.ok { background: #0d2e1e; color: #4eca8b; }
+  .check-chip.fail { background: #2e1010; color: #e87070; }
+  .check-chip.na { background: #1e1e1e; color: #555; }
+  .badge-pend { font-size: 12px; background: #3a2e00; color: #e0c040; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .badge-ok { font-size: 12px; background: #0d2e1e; color: #4eca8b; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .badge-warn { font-size: 12px; background: #2e1a0d; color: #e8a050; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .btn-confirm { background: #1d9e75; color: #fff; font-size: 13px; padding: 6px 16px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
+  .btn-confirm:hover { background: #178a65; }
+  .btn-confirm:disabled { background: #0d5040; cursor: not-allowed; color: #4eca8b; }
+  .no-entries { text-align: center; color: #555; padding: 3rem 0; font-size: 14px; }
+
+  /* Upload / PDF tab */
+  .section-title { font-size: 12px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
+  .upload-box { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
+  .upload-grid { display: grid; grid-template-columns: 1fr 1fr 100px; gap: 10px; margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+  .field input { width: 100%; padding: 0.6rem 0.75rem; border: 0.5px solid #2e3142; border-radius: 8px; font-size: 14px; color: #e0e0e0; background: #12151f; outline: none; }
+  .field input:focus { border-color: #5b7de8; }
+  .file-field { margin-bottom: 12px; }
+  .file-field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+  .file-field input[type=file] { font-size: 13px; color: #aaa; padding: 0.4rem 0; width: 100%; }
+  .err-msg { font-size: 12px; color: #e05a5a; margin-bottom: 8px; display: none; }
+  .upload-status { font-size: 13px; margin-top: 0.75rem; padding: 0.6rem 0.75rem; border-radius: 8px; display: none; }
+  .upload-status.ok { background: #0d2e1e; color: #4eca8b; border: 0.5px solid #1d9e75; display: block; }
+  .upload-status.err { background: #2e1010; color: #e87070; border: 0.5px solid #a33; display: block; }
+  .btn-primary { background: #5b7de8; color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; }
+  .btn-primary:hover { background: #4a6ad4; }
+  .btn-primary:disabled { background: #3a4a7a; cursor: not-allowed; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 500; color: #666; font-size: 11px; text-transform: uppercase; padding: 8px 10px; border-bottom: 0.5px solid #2e3142; white-space: nowrap; }
+  td { padding: 10px; border-bottom: 0.5px solid #1e2130; color: #ccc; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1e2130; }
+  .pdf-link { color: #6ab0f5; text-decoration: none; font-size: 12px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .del-btn { background: #2e1010; border: 0.5px solid #a33; color: #e87070; cursor: pointer; font-size: 12px; padding: 3px 10px; border-radius: 6px; }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #444; border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .anf-grid { grid-template-columns: repeat(2, 1fr); }
+    .upload-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <h1>🔐 Admin-Bereich</h1>
+    <p>Einbauüberprüfung – Verwaltung</p>
+    <div class="login-field"><label>Benutzername</label><input type="text" id="username" placeholder="admin" onkeydown="if(event.key==='Enter')login()"></div>
+    <div class="login-field"><label>Passwort</label><input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+    <div class="login-err" id="login-err">Benutzername oder Passwort falsch.</div>
+    <button class="btn-login" onclick="login()">Einloggen →</button>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin-screen">
+    <div class="top-bar">
+      <h1>Admin-Panel</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="badge-live">● Supabase verbunden</span>
+        <button class="logout-btn" onclick="logout()">Abmelden</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-box hl"><div class="stat-num yellow" id="stat-pending">–</div><div class="stat-label">⏳ Ausstehend</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-bestaetigt">–</div><div class="stat-label">✅ Bestätigt</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-anfragen">–</div><div class="stat-label">Anfragen gesamt</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-pdfs">–</div><div class="stat-label">PDFs in Datenbank</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-btn-anfragen" onclick="switchTab('anfragen')">📋 Kundenanfragen <span class="tab-badge" id="pending-badge">0</span></button>
+      <button class="tab" id="tab-btn-pdfs" onclick="switchTab('pdfs')">📄 PDF-Datenbank</button>
+    </div>
+
+    <!-- TAB: Anfragen -->
+    <div class="tab-content active" id="tab-anfragen">
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterAnfragen('alle',this)">Alle</button>
+        <button class="filter-btn" onclick="filterAnfragen('ausstehend',this)">⏳ Ausstehend</button>
+        <button class="filter-btn" onclick="filterAnfragen('bestaetigt',this)">✅ Bestätigt</button>
+        <button class="filter-btn" onclick="filterAnfragen('unvollständig',this)">⚠ Unvollständig</button>
+        <button class="refresh-btn" onclick="renderAnfragen()">↺ Aktualisieren</button>
+        <span style="font-size:12px;color:#555;"><span class="live-dot"></span>Live</span>
+      </div>
+      <div style="margin-bottom:1.25rem;position:relative;">
+        <input type="text" id="search-input" oninput="displayAnfragen()" placeholder="🔍  Suche nach Kennzeichen, Seriennummer, Fahrzeug…" style="width:100%;padding:0.7rem 1rem 0.7rem 1rem;border:0.5px solid #2e3142;border-radius:10px;background:#12151f;color:#e0e0e0;font-size:14px;outline:none;">
+      </div>
+      <div class="anfragen-list" id="anfragen-list">
+        <div class="no-entries"><span class="spinner"></span> Wird geladen…</div>
+      </div>
+    </div>
+
+    <!-- TAB: PDFs -->
+    <div class="tab-content" id="tab-pdfs">
+      <div class="section-title">Neue Anleitung hochladen</div>
+      <div class="upload-box">
+        <div class="upload-grid">
+          <div class="field"><label>Marke *</label><input type="text" id="u-marke" placeholder="z.B. BMW"></div>
+          <div class="field"><label>Modell *</label><input type="text" id="u-modell" placeholder="z.B. 3er"></div>
+          <div class="field"><label>Baujahr *</label><input type="number" id="u-baujahr" placeholder="2021"></div>
+        </div>
+        <div class="file-field"><label>PDF-Datei *</label><input type="file" id="u-file" accept="application/pdf"></div>
+        <div class="err-msg" id="err-upload">Bitte alle Felder ausfüllen und eine PDF wählen.</div>
+        <button class="btn-primary" id="btn-upload" onclick="uploadPDF()">+ PDF hochladen</button>
+        <div class="upload-status" id="upload-status"></div>
+      </div>
+      <div class="section-title">Vorhandene Anleitungen</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Marke</th><th>Modell</th><th>Baujahr</th><th>Datei</th><th>Status</th><th>Datum</th><th></th></tr></thead>
+          <tbody id="db-body"><tr><td colspan="7" class="no-entries"><span class="spinner"></span></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://dkwanwxlvbjpmukjjlji.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrd2Fud3hsdmJqcG11a2pqbGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTU5NjksImV4cCI6MjA5Mjk5MTk2OX0.KcqlKIZUaZ0I4AP-XaG_31Iu7zePmnLuYdSz6B0Z3LQ';
+  const BUCKET = 'anleitungen';
+  const H = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+  const ADMIN_USER = 'admin', ADMIN_PASS = 'einbau2024';
+
+  let currentFilter = 'alle', allAnfragen = [], autoRefresh = null;
+
+  function login() {
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    if (u === ADMIN_USER && p === ADMIN_PASS) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      loadAll();
+      autoRefresh = setInterval(renderAnfragen, 10000);
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    clearInterval(autoRefresh);
+    document.getElementById('login-screen').style.display = 'block';
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-btn-' + name).classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'pdfs') renderPDFs();
+  }
+
+  async function loadAll() { await Promise.all([renderAnfragen(), renderPDFs()]); }
+
+  // ── Anfragen als Cards ─────────────────────────────────────────────
+  async function renderAnfragen() {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/einbau_ergebnisse?select=*&order=created_at.desc`, { headers: H });
+      allAnfragen = await r.json();
+      const pending = allAnfragen.filter(a => a.status === 'ausstehend').length;
+      const bestaetigt = allAnfragen.filter(a => a.status === 'bestaetigt').length;
+      document.getElementById('stat-anfragen').textContent = allAnfragen.length;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-bestaetigt').textContent = bestaetigt;
+      const badge = document.getElementById('pending-badge');
+      badge.textContent = pending;
+      badge.style.display = pending > 0 ? 'flex' : 'none';
+      displayAnfragen();
+    } catch(e) {
+      document.getElementById('anfragen-list').innerHTML = '<div class="no-entries">Fehler beim Laden.</div>';
+    }
+  }
+
+  function displayAnfragen() {
+    const list = document.getElementById('anfragen-list');
+    const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+    let rows = currentFilter === 'alle' ? allAnfragen : allAnfragen.filter(a => a.status === currentFilter);
+    if (q) {
+      rows = rows.filter(r =>
+        (r.kennzeichen || '').toLowerCase().includes(q) ||
+        (r.seriennummer || '').toLowerCase().includes(q) ||
+        (r.marke || '').toLowerCase().includes(q) ||
+        (r.modell || '').toLowerCase().includes(q) ||
+        (r.baujahr || '').toString().includes(q)
+      );
+    }
+    if (!rows.length) { list.innerHTML = '<div class="no-entries">Keine Einträge gefunden.</div>'; return; }
+
+    list.innerHTML = rows.map(r => {
+      const d = new Date(r.created_at);
+      const date = d.toLocaleDateString('de-AT') + ' ' + d.toLocaleTimeString('de-AT', {hour:'2-digit',minute:'2-digit'});
+
+      const chipVal = v => {
+        if (!v || v === '-' || v === 'n/a') return `<span class="check-chip na">–</span>`;
+        return v === 'ja' ? `<span class="check-chip ok">✓ Ja</span>` : `<span class="check-chip fail">✗ Nein</span>`;
+      };
+
+      let statusBadge, aktion, cardClass = '';
+      if (r.status === 'ausstehend') {
+        statusBadge = '<span class="badge-pend">⏳ Ausstehend</span>';
+        aktion = `<button class="btn-confirm" onclick="bestaetigen('${r.id}',this)">✓ Bestätigen</button>`;
+        cardClass = 'pending';
+      } else if (r.status === 'bestaetigt') {
+        statusBadge = '<span class="badge-ok">✅ Bestätigt</span>';
+        aktion = '<span style="color:#555;font-size:12px;">erledigt</span>';
+        cardClass = 'bestaetigt';
+      } else {
+        statusBadge = '<span class="badge-warn">⚠ Unvollständig</span>';
+        aktion = '';
+      }
+
+      // System-Info nur anzeigen wenn vorhanden
+      const systemVal = r.system ? `<span style="color:#6ab0f5;font-weight:600;">${r.system}</span>` : '<span style="color:#555;">–</span>';
+      const bustypVal = r.bustyp || '–';
+      const steckerVal = r.stecker || '–';
+
+      return `<div class="anf-card ${cardClass}">
+        <div class="anf-header">
+          <div>
+            <div class="anf-kz">${r.kennzeichen}</div>
+            <div class="anf-date">${date}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            ${statusBadge}
+            ${aktion}
+          </div>
+        </div>
+        <div class="anf-grid">
+          <div class="anf-field"><div class="anf-field-label">Kunde</div><div class="anf-field-val" style="color:#fff;">${r.kunde || '–'}</div></div>
+          <div class="anf-field"><div class="anf-field-label">Fahrzeug</div><div class="anf-field-val">${r.marke} ${r.modell} (${r.baujahr})</div></div>
+          <div class="anf-field"><div class="anf-field-label">Seriennummer</div><div class="anf-field-val">${r.seriennummer}</div></div>
+          <div class="anf-field"><div class="anf-field-label">System</div><div class="anf-field-val">${systemVal}</div></div>
+          <div class="anf-field"><div class="anf-field-label">Bustyp</div><div class="anf-field-val highlight">${bustypVal}</div></div>
+          <div class="anf-field"><div class="anf-field-label">Tacho</div><div class="anf-field-val highlight">${steckerVal}</div></div>
+        </div>
+        <div class="anf-footer">
+          <div class="checks">
+            <span style="font-size:12px;color:#555;">Zündung:</span> ${chipVal(r.zuendung)}
+            <span style="font-size:12px;color:#555;">Kabel:</span> ${chipVal(r.kabel)}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function bestaetigen(id, btn) {
+    btn.disabled = true; btn.textContent = '…';
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/einbau_ergebnisse?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { ...H, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ bestaetigt: true, status: 'bestaetigt', bestaetigt_am: new Date().toISOString() })
+      });
+      await renderAnfragen();
+    } catch(e) { btn.disabled = false; btn.textContent = '✓ Bestätigen'; alert('Fehler beim Bestätigen.'); }
+  }
+
+  function filterAnfragen(val, btn) {
+    currentFilter = val;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    displayAnfragen();
+  }
+
+  // ── PDFs ───────────────────────────────────────────────────────────
+  function publicUrl(path) { return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`; }
+
+  async function renderPDFs() {
+    const tbody = document.getElementById('db-body');
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/fahrzeug_anleitungen?select=*&order=created_at.desc`, { headers: H });
+      const rows = await r.json();
+      document.getElementById('stat-pdfs').textContent = rows.length;
+      if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="no-entries">Noch keine PDFs vorhanden.</td></tr>'; return; }
+      tbody.innerHTML = rows.map(r => {
+        const date = new Date(r.created_at).toLocaleDateString('de-AT');
+        const url = publicUrl(r.storage_path);
+        return `<tr>
+          <td>${r.marke}</td><td>${r.modell}</td><td>${r.baujahr}</td>
+          <td><a class="pdf-link" href="${url}" target="_blank">${r.filename}</a></td>
+          <td><span style="font-size:11px;background:#0d2e1e;color:#4eca8b;padding:2px 8px;border-radius:20px;">✓ Aktiv</span></td>
+          <td style="color:#555;font-size:12px;">${date}</td>
+          <td><button class="del-btn" onclick="deletePDF('${r.id}','${r.storage_path}')">✕</button></td>
+        </tr>`;
+      }).join('');
+    } catch(e) { tbody.innerHTML = '<tr><td colspan="7" class="no-entries">Fehler beim Laden.</td></tr>'; }
+  }
+
+  async function uploadPDF() {
+    const marke = document.getElementById('u-marke').value.trim();
+    const modell = document.getElementById('u-modell').value.trim();
+    const baujahr = document.getElementById('u-baujahr').value.trim();
+    const file = document.getElementById('u-file').files[0];
+    const err = document.getElementById('err-upload');
+    const status = document.getElementById('upload-status');
+    if (!marke || !modell || !baujahr || !file) { err.style.display = 'block'; return; }
+    err.style.display = 'none'; status.className = 'upload-status';
+    const btn = document.getElementById('btn-upload');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Hochladen…';
+    const path = `${marke}_${modell}_${baujahr}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`.replace(/\s+/g,'_');
+    try {
+      const up = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
+        method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/pdf' }, body: file
+      });
+      if (!up.ok) throw new Error('Storage-Upload fehlgeschlagen');
+      const ins = await fetch(`${SUPABASE_URL}/rest/v1/fahrzeug_anleitungen`, {
+        method: 'POST', headers: { ...H, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ marke, modell, baujahr, filename: file.name, storage_path: path })
+      });
+      if (!ins.ok) throw new Error('Datenbank-Eintrag fehlgeschlagen');
+      ['u-marke','u-modell','u-baujahr'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('u-file').value = '';
+      status.className = 'upload-status ok';
+      status.textContent = '✓ PDF hochgeladen für ' + marke + ' ' + modell + ' (' + baujahr + ')';
+      renderPDFs();
+    } catch(e) { status.className = 'upload-status err'; status.textContent = '✗ ' + e.message; }
+    btn.disabled = false; btn.innerHTML = '+ PDF hochladen';
+  }
+
+  async function deletePDF(id, path) {
+    if (!confirm('PDF wirklich löschen?')) return;
+    await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+    await fetch(`${SUPABASE_URL}/rest/v1/fahrzeug_anleitungen?id=eq.${id}`, { method: 'DELETE', headers: H });
+    renderPDFs();
+  }
+</script>
+</body>
+</html>
