@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: sans-serif; background: #0f1117; min-height: 100vh; padding: 2rem 1rem; color: #e0e0e0; }
-  .wrap { max-width: 1100px; margin: 0 auto; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
 
   /* Login */
   #login-screen { max-width: 360px; margin: 4rem auto; background: #1a1d27; border-radius: 12px; border: 0.5px solid #2e3142; padding: 2rem; }
@@ -19,17 +19,16 @@
   .login-field input:focus { border-color: #5b7de8; }
   .login-err { font-size: 13px; color: #e05a5a; margin-bottom: 0.75rem; display: none; }
   .btn-login { width: 100%; background: #5b7de8; color: #fff; padding: 0.75rem; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; }
-  .btn-login:hover { background: #4a6ad4; }
 
   /* Admin */
   #admin-screen { display: none; }
-  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 10px; flex-wrap: wrap; }
   .top-bar h1 { font-size: 20px; font-weight: 600; color: #fff; }
-  .badge-live { font-size: 12px; background: #1e3a5f; color: #6ab0f5; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .badge-live { font-size: 12px; background: #1e3a5f; color: #6ab0f5; padding: 3px 10px; border-radius: 20px; }
   .logout-btn { font-size: 13px; color: #888; background: none; border: none; cursor: pointer; text-decoration: underline; }
 
   /* Stats */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 1.5rem; }
   .stat-box { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 8px; padding: 1rem 1.25rem; }
   .stat-box.hl { border-color: #e0c040; background: #1a1800; }
   .stat-num { font-size: 26px; font-weight: 600; color: #fff; }
@@ -44,42 +43,63 @@
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
-  /* Filter bar */
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+  /* Filter */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
   .filter-btn { padding: 0.4rem 1rem; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid #2e3142; background: #12151f; color: #888; }
   .filter-btn.active { background: #5b7de8; border-color: #5b7de8; color: #fff; }
-  .refresh-btn { margin-left: auto; padding: 0.4rem 1rem; border-radius: 8px; font-size: 13px; cursor: pointer; border: 0.5px solid #2e3142; background: #12151f; color: #888; }
+  .refresh-btn { padding: 0.4rem 1rem; border-radius: 8px; font-size: 13px; cursor: pointer; border: 0.5px solid #2e3142; background: #12151f; color: #888; margin-left: auto; }
   .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #1d9e75; animation: livepulse 2s infinite; display: inline-block; margin-right: 4px; }
   @keyframes livepulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-  /* Anfragen Cards */
-  .anfragen-list { display: flex; flex-direction: column; gap: 10px; }
-  .anf-card { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 10px; padding: 1.1rem 1.25rem; }
+  /* Search */
+  .search-wrap { margin-bottom: 1.25rem; }
+  .search-wrap input { width: 100%; padding: 0.75rem 1rem; border: 0.5px solid #2e3142; border-radius: 10px; background: #12151f; color: #e0e0e0; font-size: 14px; outline: none; }
+  .search-wrap input:focus { border-color: #5b7de8; }
+
+  /* Cards */
+  .anfragen-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .anf-card { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 10px; overflow: hidden; }
   .anf-card.pending { border-color: #e0c040; background: #1a1800; }
-  .anf-card.bestaetigt { border-color: #1d9e75; }
-  .anf-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 0.75rem; flex-wrap: wrap; }
-  .anf-kz { font-size: 18px; font-weight: 700; color: #fff; }
-  .anf-date { font-size: 12px; color: #555; margin-top: 2px; }
-  .anf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 0.9rem; }
+  .anf-card.bestaetigt { border-color: #1d4a30; }
+  .anf-card.unvollstaendig { border-color: #5a3000; }
+
+  .anf-summary { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.1rem; cursor: pointer; gap: 12px; flex-wrap: wrap; }
+  .anf-summary:hover { background: rgba(255,255,255,0.03); }
+
+  .anf-left { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+  .anf-kunde { font-size: 18px; font-weight: 700; color: #fff; }
+  .anf-kz { font-size: 14px; font-weight: 600; color: #aaa; }
+  .anf-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+
+  .anf-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .anf-date { font-size: 12px; color: #555; }
+  .toggle-arrow { font-size: 11px; color: #555; }
+
+  .anf-detail { padding: 0 1.1rem 1rem; border-top: 0.5px solid #2e3142; }
+  .anf-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 0.9rem 0 0.75rem; }
   .anf-field { background: #12151f; border-radius: 7px; padding: 0.5rem 0.7rem; }
   .anf-field-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
   .anf-field-val { font-size: 13px; color: #ccc; font-weight: 500; }
-  .anf-field-val.highlight { color: #6ab0f5; }
-  .anf-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .checks { display: flex; gap: 10px; flex-wrap: wrap; }
+  .anf-field-val.blue { color: #6ab0f5; }
+
+  .anf-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
   .check-chip { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
   .check-chip.ok { background: #0d2e1e; color: #4eca8b; }
   .check-chip.fail { background: #2e1010; color: #e87070; }
   .check-chip.na { background: #1e1e1e; color: #555; }
+
   .badge-pend { font-size: 12px; background: #3a2e00; color: #e0c040; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
   .badge-ok { font-size: 12px; background: #0d2e1e; color: #4eca8b; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
   .badge-warn { font-size: 12px; background: #2e1a0d; color: #e8a050; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+
   .btn-confirm { background: #1d9e75; color: #fff; font-size: 13px; padding: 6px 16px; border-radius: 8px; cursor: pointer; border: none; font-weight: 600; }
   .btn-confirm:hover { background: #178a65; }
-  .btn-confirm:disabled { background: #0d5040; cursor: not-allowed; color: #4eca8b; }
+  .btn-confirm:disabled { background: #0d5040; cursor: not-allowed; }
+
   .no-entries { text-align: center; color: #555; padding: 3rem 0; font-size: 14px; }
 
-  /* Upload / PDF tab */
+  /* PDF Tab */
   .section-title { font-size: 12px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
   .upload-box { background: #1a1d27; border: 0.5px solid #2e3142; border-radius: 10px; padding: 1.5rem; margin-bottom: 2rem; }
   .upload-grid { display: grid; grid-template-columns: 1fr 1fr 100px; gap: 10px; margin-bottom: 10px; }
@@ -94,7 +114,6 @@
   .upload-status.ok { background: #0d2e1e; color: #4eca8b; border: 0.5px solid #1d9e75; display: block; }
   .upload-status.err { background: #2e1010; color: #e87070; border: 0.5px solid #a33; display: block; }
   .btn-primary { background: #5b7de8; color: #fff; padding: 0.7rem 1.4rem; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; }
-  .btn-primary:hover { background: #4a6ad4; }
   .btn-primary:disabled { background: #3a4a7a; cursor: not-allowed; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -109,8 +128,8 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   @media (max-width: 600px) {
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    .anf-grid { grid-template-columns: repeat(2, 1fr); }
+    .stats { grid-template-columns: repeat(2,1fr); }
+    .anf-grid { grid-template-columns: repeat(2,1fr); }
     .upload-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
@@ -160,8 +179,8 @@
         <button class="refresh-btn" onclick="renderAnfragen()">↺ Aktualisieren</button>
         <span style="font-size:12px;color:#555;"><span class="live-dot"></span>Live</span>
       </div>
-      <div style="margin-bottom:1.25rem;position:relative;">
-        <input type="text" id="search-input" oninput="displayAnfragen()" placeholder="🔍  Suche nach Kennzeichen, Seriennummer, Fahrzeug…" style="width:100%;padding:0.7rem 1rem 0.7rem 1rem;border:0.5px solid #2e3142;border-radius:10px;background:#12151f;color:#e0e0e0;font-size:14px;outline:none;">
+      <div class="search-wrap">
+        <input type="text" id="search-input" oninput="displayAnfragen()" placeholder="🔍  Suche nach Kennzeichen, Seriennummer, Fahrzeug…">
       </div>
       <div class="anfragen-list" id="anfragen-list">
         <div class="no-entries"><span class="spinner"></span> Wird geladen…</div>
@@ -233,25 +252,15 @@
 
   async function loadAll() { await Promise.all([renderAnfragen(), renderPDFs()]); }
 
-  // ── Anfragen als Cards ─────────────────────────────────────────────
-  function toggleCard(id) {
-    const body = document.getElementById('body-' + id);
-    const icon = document.getElementById('icon-' + id);
-    if (!body) return;
-    const isHidden = body.style.display === 'none';
-    body.style.display = isHidden ? 'block' : 'none';
-    if (icon) icon.textContent = isHidden ? '▲' : '▼';
-  }
-
   async function renderAnfragen() {
     try {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/einbau_ergebnisse?select=*&order=created_at.desc`, { headers: H });
       allAnfragen = await r.json();
       const pending = allAnfragen.filter(a => a.status === 'ausstehend').length;
-      const bestaetigt = allAnfragen.filter(a => a.status === 'bestaetigt').length;
+      const best = allAnfragen.filter(a => a.status === 'bestaetigt').length;
       document.getElementById('stat-anfragen').textContent = allAnfragen.length;
       document.getElementById('stat-pending').textContent = pending;
-      document.getElementById('stat-bestaetigt').textContent = bestaetigt;
+      document.getElementById('stat-bestaetigt').textContent = best;
       const badge = document.getElementById('pending-badge');
       badge.textContent = pending;
       badge.style.display = pending > 0 ? 'flex' : 'none';
@@ -261,34 +270,34 @@
     }
   }
 
+  function chip(v) {
+    if (!v || v === '-' || v === 'n/a') return '<span class="check-chip na">–</span>';
+    return v === 'ja' ? '<span class="check-chip ok">✓ Ja</span>' : '<span class="check-chip fail">✗ Nein</span>';
+  }
+
   function displayAnfragen() {
     const list = document.getElementById('anfragen-list');
     const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     let rows = currentFilter === 'alle' ? allAnfragen : allAnfragen.filter(a => a.status === currentFilter);
-    if (q) {
-      rows = rows.filter(r =>
-        (r.kennzeichen || '').toLowerCase().includes(q) ||
-        (r.seriennummer || '').toLowerCase().includes(q) ||
-        (r.marke || '').toLowerCase().includes(q) ||
-        (r.modell || '').toLowerCase().includes(q) ||
-        (r.baujahr || '').toString().includes(q)
-      );
-    }
+    if (q) rows = rows.filter(r =>
+      (r.kennzeichen||'').toLowerCase().includes(q) ||
+      (r.seriennummer||'').toLowerCase().includes(q) ||
+      (r.marke||'').toLowerCase().includes(q) ||
+      (r.modell||'').toLowerCase().includes(q) ||
+      (r.kunde||'').toLowerCase().includes(q) ||
+      (r.baujahr||'').toString().includes(q)
+    );
     if (!rows.length) { list.innerHTML = '<div class="no-entries">Keine Einträge gefunden.</div>'; return; }
 
     list.innerHTML = rows.map(r => {
       const d = new Date(r.created_at);
-      const date = d.toLocaleDateString('de-AT') + ' ' + d.toLocaleTimeString('de-AT', {hour:'2-digit',minute:'2-digit'});
+      const date = d.toLocaleDateString('de-AT') + ' ' + d.toLocaleTimeString('de-AT',{hour:'2-digit',minute:'2-digit'});
+      const collapsed = r.status === 'bestaetigt';
 
-      const chipVal = v => {
-        if (!v || v === '-' || v === 'n/a') return `<span class="check-chip na">–</span>`;
-        return v === 'ja' ? `<span class="check-chip ok">✓ Ja</span>` : `<span class="check-chip fail">✗ Nein</span>`;
-      };
-
-      let statusBadge, aktion, cardClass = '';
+      let statusBadge = '', aktion = '', cardClass = '';
       if (r.status === 'ausstehend') {
         statusBadge = '<span class="badge-pend">⏳ Ausstehend</span>';
-        aktion = `<button class="btn-confirm" onclick="bestaetigen('${r.id}',this)">✓ Bestätigen</button>`;
+        aktion = `<button class="btn-confirm" onclick="event.stopPropagation();bestaetigen('${r.id}',this)">✓ Bestätigen</button>`;
         cardClass = 'pending';
       } else if (r.status === 'bestaetigt') {
         statusBadge = '<span class="badge-ok">✅ Bestätigt</span>';
@@ -296,49 +305,54 @@
         cardClass = 'bestaetigt';
       } else {
         statusBadge = '<span class="badge-warn">⚠ Unvollständig</span>';
-        aktion = '';
+        cardClass = 'unvollstaendig';
       }
 
-      // System-Info nur anzeigen wenn vorhanden
-      const systemVal = r.system ? `<span style="color:#6ab0f5;font-weight:600;">${r.system}</span>` : '<span style="color:#555;">–</span>';
-      const bustypVal = r.bustyp || '–';
-      const steckerVal = r.stecker || '–';
-
-      return `        <div class="anf-card ${cardClass}" onclick="toggleCard(this)" style="cursor:pointer;">
-        <div class="anf-header">
-          <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;">
+      return `
+      <div class="anf-card ${cardClass}">
+        <div class="anf-summary" onclick="toggle('${r.id}')">
+          <div class="anf-left">
             <div>
-              <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Kunde</div>
-              <div style="font-size:20px;font-weight:700;color:#fff;">${r.kunde || '–'}</div>
+              <div class="anf-label">Kunde</div>
+              <div class="anf-kunde">${r.kunde || '–'}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Kennzeichen</div>
+              <div class="anf-label">Kennzeichen</div>
               <div class="anf-kz">${r.kennzeichen}</div>
             </div>
-            <div style="margin-left:auto;font-size:12px;color:#555;">${date}</div>
           </div>
-        </div>
-        <div class="anf-body" style="${r.status === 'bestaetigt' ? 'display:none;' : ''}margin-top:0.75rem;">
-          <div class="anf-grid">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="anf-right">
             ${statusBadge}
-            ${aktion}
+            <span class="anf-date">${date}</span>
+            <span class="toggle-arrow" id="arr-${r.id}">${collapsed ? '▼' : '▲'}</span>
           </div>
         </div>
-        <div class="anf-grid">
-          <div class="anf-field"><div class="anf-field-label">Fahrzeug</div><div class="anf-field-val">${r.marke} ${r.modell} (${r.baujahr})</div></div>
-          <div class="anf-field"><div class="anf-field-label">Seriennummer</div><div class="anf-field-val">${r.seriennummer}</div></div>
-          <div class="anf-field"><div class="anf-field-label">System</div><div class="anf-field-val">${systemVal}</div></div>
-          <div class="anf-field"><div class="anf-field-label">Bustyp</div><div class="anf-field-val highlight">${bustypVal}</div></div>
-          <div class="anf-field"><div class="anf-field-label">Tacho</div><div class="anf-field-val highlight">${steckerVal}</div></div>
-        </div>
-        <div class="anf-footer">
-          <div class="checks">
-            <span style="font-size:12px;color:#555;">Zündung:</span> ${chipVal(r.zuendung)}
+        <div class="anf-detail" id="det-${r.id}" style="display:${collapsed ? 'none' : 'block'}">
+          <div class="anf-grid">
+            <div class="anf-field"><div class="anf-field-label">Fahrzeug</div><div class="anf-field-val">${r.marke} ${r.modell} (${r.baujahr})</div></div>
+            <div class="anf-field"><div class="anf-field-label">Seriennummer</div><div class="anf-field-val">${r.seriennummer}</div></div>
+            <div class="anf-field"><div class="anf-field-label">System</div><div class="anf-field-val blue">${r.system || '–'}</div></div>
+            <div class="anf-field"><div class="anf-field-label">Bustyp</div><div class="anf-field-val blue">${r.bustyp || '–'}</div></div>
+            <div class="anf-field"><div class="anf-field-label">Tacho</div><div class="anf-field-val blue">${r.stecker || '–'}</div></div>
+          </div>
+          <div class="anf-footer">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:12px;color:#555;">Zündung:</span>${chip(r.zuendung)}
+            </div>
+            <div>${aktion}</div>
           </div>
         </div>
       </div>`;
     }).join('');
+  }
+
+  function toggle(id) {
+    const det = document.getElementById('det-' + id);
+    const arr = document.getElementById('arr-' + id);
+    if (!det) return;
+    const show = det.style.display === 'none';
+    det.style.display = show ? 'block' : 'none';
+    if (arr) arr.textContent = show ? '▲' : '▼';
   }
 
   async function bestaetigen(id, btn) {
@@ -350,7 +364,7 @@
         body: JSON.stringify({ bestaetigt: true, status: 'bestaetigt', bestaetigt_am: new Date().toISOString() })
       });
       await renderAnfragen();
-    } catch(e) { btn.disabled = false; btn.textContent = '✓ Bestätigen'; alert('Fehler beim Bestätigen.'); }
+    } catch(e) { btn.disabled = false; btn.textContent = '✓ Bestätigen'; }
   }
 
   function filterAnfragen(val, btn) {
@@ -360,7 +374,6 @@
     displayAnfragen();
   }
 
-  // ── PDFs ───────────────────────────────────────────────────────────
   function publicUrl(path) { return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`; }
 
   async function renderPDFs() {
